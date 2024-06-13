@@ -1,5 +1,6 @@
 import requests
 import os
+from send_email import send_email
 
 api_key = os.getenv("NEWS_API_KEY")
 url = (f"https://newsapi.org/v2/top-headlines?country="
@@ -11,7 +12,19 @@ request = requests.get(url)
 # Get a dictionary with data
 content = request.json()
 
-# Access article titles
-for article in content["articles"]:
-    print(article["title"])
-    print(article["description"])
+# write article titles and descriptions
+with open("draft.txt", 'w') as file:
+    for article in content["articles"]:
+        file.writelines(article["title"] + '\n')
+        try:
+            file.writelines(article["description"] + 2*'\n')
+        except TypeError:
+            file.writelines("(no description given)" + 2*'\n')
+
+
+with open("draft.txt", 'r') as file:
+    message = file.read()
+    message = message.encode(encoding='utf-8')
+
+
+send_email(message)
