@@ -23,7 +23,11 @@ with open("draft.txt", 'w') as file:
 
 
 with open("draft.txt", 'r') as file:
-    message = file.read()
+    message = f"""\
+Subject: News for today
+
+{file.read()}
+"""
     message = message.encode(encoding='utf-8')
 
 
