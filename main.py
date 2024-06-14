@@ -2,9 +2,13 @@ import requests
 import os
 from send_email import send_email
 
+topic = "archaeology"
+
 api_key = os.getenv("NEWS_API_KEY")
-url = (f"https://newsapi.org/v2/top-headlines?country="
-       f"us&category=business&apiKey={api_key}")
+url = (f"https://newsapi.org/v2/everything?"
+       f"q={topic}"
+       f"&apiKey={api_key}"
+       f"&language=en")
 
 # make request
 request = requests.get(url)
@@ -13,22 +17,21 @@ request = requests.get(url)
 content = request.json()
 
 # write article titles and descriptions
-with open("draft.txt", 'w') as file:
-    for article in content["articles"]:
-        file.writelines(article["title"] + '\n')
-        try:
-            file.writelines(article["description"] + 2*'\n')
-        except TypeError:
-            file.writelines("(no description given)" + 2*'\n')
+body = ""
+
+for article in content["articles"][:20]:
+   if article["title"] is not None:
+       body = body + article["title"] + '\n'
+   if article["description"] is not None:
+       body = body + article["description"] + '\n'
+   body = body + article["url"] + 2*'\n'
 
 
-with open("draft.txt", 'r') as file:
-    message = f"""\
-Subject: News for today
+message = f"""\
+Subject: Your {topic} news for today
 
-{file.read()}
+{body}
 """
-    message = message.encode(encoding='utf-8')
 
-
-send_email(message)
+message = message.encode(encoding='utf-8')
+send_email(message=message)
